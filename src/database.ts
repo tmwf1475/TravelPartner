@@ -2,16 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { config } from "./config.js";
-
-export type TripDashboard = {
-  id: string;
-  destination: string;
-  days: number;
-  style: string;
-  start_date: string;
-  itinerary: unknown;
-  created_at: string;
-};
+import type { TripDashboard, TripItinerary } from "./types.js";
 
 let db: Database.Database | undefined;
 
@@ -61,7 +52,7 @@ export const findTripById = (id: string): TripDashboard | undefined => {
 
   return {
     ...row,
-    itinerary: JSON.parse(row.itinerary) as unknown
+    itinerary: JSON.parse(row.itinerary) as TripItinerary
   };
 };
 

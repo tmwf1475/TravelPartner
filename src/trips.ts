@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { ApiError } from "./errors.js";
 import { findTripById, saveTrip } from "./database.js";
+import { generateItinerary } from "./gemini.js";
+import type { GenerateTripRequest, TripDashboard } from "./types.js";
 
 type GenerateTripBody = {
   destination?: unknown;
@@ -10,14 +12,7 @@ type GenerateTripBody = {
   start_date?: unknown;
 };
 
-type ValidGenerateTripBody = {
-  destination: string;
-  days: number;
-  style: string;
-  start_date: string;
-};
-
-const validateGenerateTripBody = (body: GenerateTripBody): ValidGenerateTripBody => {
+const validateGenerateTripBody = (body: GenerateTripBody): GenerateTripRequest => {
   const details: Record<string, string> = {};
 
   if (typeof body.destination !== "string" || body.destination.trim().length === 0) {
@@ -41,35 +36,35 @@ const validateGenerateTripBody = (body: GenerateTripBody): ValidGenerateTripBody
   }
 
   return {
-    destination: body.destination,
-    days: body.days,
-    style: body.style,
-    start_date: body.start_date
-  } as ValidGenerateTripBody;
+    destination: body.destination as string,
+    days: body.days as number,
+    style: body.style as string,
+    start_date: body.start_date as string
+  };
 };
 
-export const generateAllTrip = (req: Request, res: Response): void => {
-  const body = validateGenerateTripBody(req.body as GenerateTripBody);
-  const now = new Date().toISOString();
-  const trip = {
-    id: randomUUID(),
-    destination: body.destination.trim(),
-    days: body.days,
-    style: body.style.trim(),
-    start_date: body.start_date,
-    created_at: now,
-    itinerary: {
-      summary: `${body.days}-day trip to ${body.destination}`,
-      days: Array.from({ length: body.days }, (_, index) => ({
-        day: index + 1,
-        title: `${body.destination} day ${index + 1}`,
-        notes: "Generated placeholder itinerary for MVP. Gemini integration can replace this after validation."
-      }))
-    }
-  };
+export const generateAllTrip = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const body = validateGenerateTripBody(req.body as GenerateTripBody);
+    const request = {
+      destination: body.destination.trim(),
+      days: body.days,
+      style: body.style.trim(),
+      start_date: body.start_date
+    };
+    const itinerary = await generateItinerary(request);
+    const trip: TripDashboard = {
+      id: randomUUID(),
+      ...request,
+      created_at: new Date().toISOString(),
+      itinerary
+    };
 
-  saveTrip(trip);
-  res.status(201).json({ trip });
+    saveTrip(trip);
+    res.status(201).json({ trip });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getTripDashboard = (req: Request, res: Response): void => {

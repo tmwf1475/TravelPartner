@@ -1,10 +1,11 @@
 import { afterAll, beforeAll } from "vitest";
 import { mkdirSync, rmSync } from "node:fs";
 
-const testDatabaseFiles = ["./data/test.sqlite", "./data/test.sqlite-shm", "./data/test.sqlite-wal"];
+const testDatabasePath = `./data/test-${process.env.VITEST_POOL_ID ?? process.pid}.sqlite`;
+const testDatabaseFiles = [testDatabasePath, `${testDatabasePath}-shm`, `${testDatabasePath}-wal`];
 
 process.env.NODE_ENV = "test";
-process.env.DATABASE_PATH = "./data/test.sqlite";
+process.env.DATABASE_PATH = testDatabasePath;
 process.env.GEMINI_API_KEY = "test-key";
 
 beforeAll(() => {

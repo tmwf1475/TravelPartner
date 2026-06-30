@@ -14,5 +14,8 @@ describe("POST /api/trips/generate-all validation", () => {
       message: expect.any(String),
       details: expect.any(Object)
     });
+
+    const dashboardResponse = await request(app).get("/api/trips/invalid-request/dashboard");
+    expect(dashboardResponse.status).toBe(404);
   });
 });
