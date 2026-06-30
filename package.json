@@ -1,0 +1,38 @@
+{
+  "name": "travelpartner",
+  "version": "0.1.0",
+  "description": "TravelPartner backend MVP",
+  "type": "module",
+  "main": "dist/server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run lint && npm run typecheck && npm run build && npm run test"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "better-sqlite3": "latest",
+    "express": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "@types/better-sqlite3": "latest",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "@types/supertest": "latest",
+    "eslint": "latest",
+    "supertest": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest",
+    "vitest": "latest"
+  }
+}
